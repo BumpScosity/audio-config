@@ -1,0 +1,25 @@
+#!/sbin/openrc-run
+command="/usr/bin/pipewire"
+command_user="user" # Replace 'user' with your actual username
+pidfile="/run/user/$(id -u $command_user)/pipewire/pipewire.pid"
+output_log="/run/user/$(id -u $command_user)/pipewire/output.log"
+
+depend() {
+    need pipewire.socket
+}
+
+start_pre() {
+    checkpath -d -o $command_user -m 0755 "/run/user/$(id -u $command_user)/pipewire"
+}
+
+start() {
+    ebegin "Starting PipeWire Multimedia Service"
+    start-stop-daemon --start --background --user $command_user --make-pidfile --pidfile $pidfile --chdir / --startas $command --stdout $output_log --stderr $output_log
+    eend $?
+}
+
+stop() {
+    ebegin "Stopping PipeWire Multimedia Service"
+    start-stop-daemon --stop --user $command_user --pidfile $pidfile --quiet
+    eend $?
+}
