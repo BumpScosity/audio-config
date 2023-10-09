@@ -1,0 +1,24 @@
+#!/sbin/openrc-run
+command="/usr/bin/pipewire-pulse"
+pidfile="/run/user/$(id -u)/pipewire-pulse/pipewire-pulse.pid"
+output_log="/run/user/$(id -u)/pipewire-pulse/output.log"
+
+depend() {
+    need pipewire
+}
+
+start_pre() {
+    checkpath -d -m 0755 "/run/user/$(id -u)/pipewire-pulse"
+}
+
+start() {
+    ebegin "Starting PipeWire PulseAudio"
+    start-stop-daemon --start --background --user "$(id -un)" --make-pidfile --pidfile $pidfile --chdir / --startas $command --stdout $output_log --stderr $output_log
+    eend $?
+}
+
+stop() {
+    ebegin "Stopping PipeWire PulseAudio"
+    start-stop-daemon --stop --user "$(id -un)" --pidfile $pidfile --quiet
+    eend $?
+}
